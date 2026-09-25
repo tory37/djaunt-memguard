@@ -1,0 +1,34 @@
+#!/bin/bash
+# MemGuard daemon. Samples memory, maintains the tier, publishes state for the
+# menu bar, notifies on escalation, and runs soft relief. Never kills anything.
+set -uo pipefail
+
+# shellcheck disable=SC1091
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/common.sh"
+
+memguard_log "daemon started (pid $$, poll ${POLL_SECONDS}s)"
+trap 'memguard_log "daemon stopping"; exit 0' INT TERM
+
+while true; do
+  eval "$(memguard_probe)"
+  resolve_tier
+  write_state_json
+
+  if ! is_paused; then
+    if [ "$TIER_CHANGED" = "1" ]; then
+      memguard_log "tier -> $TIER_NAME ($REASON)"
+      # Snapshot before notifying, so the evidence reflects the moment the
+      # threshold broke rather than whenever the alert is eventually read.
+      [ "$TIER" -ge 1 ] && record_incident "$TIER_NAME" "$REASON"
+      notify_tier_change "$TIER_NAME" "$REASON" "$(reclaimable_total_gb)"
+    fi
+
+    # Soft relief is state-preserving, so it can run unattended. Anything that
+    # terminates a process stays behind an explicit click in the menu bar.
+    if [ "$TIER" -ge 1 ] && ! relief_is_cooling_down; then
+      soft_relief
+    fi
+  fi
+
+  sleep "$POLL_SECONDS"
+done

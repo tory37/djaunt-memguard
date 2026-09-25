@@ -1,0 +1,181 @@
+#!/bin/bash
+# MemGuard command line. See `memguard help`.
+set -uo pipefail
+
+# shellcheck disable=SC1091
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/common.sh"
+
+AGENT_DAEMON="$HOME/Library/LaunchAgents/com.djaunt.memguard.plist"
+AGENT_MENUBAR="$HOME/Library/LaunchAgents/com.djaunt.memguard.menubar.plist"
+MENUBAR_APP="$MEMGUARD_HOME/menubar/DjauntMemGuardBar.app"
+
+tier_color() { case "$1" in OK) printf '\033[32m';; WARN) printf '\033[33m';; CRITICAL) printf '\033[31m';; esac; }
+
+cmd_status() {
+  eval "$(memguard_probe)"
+  resolve_tier
+  local reclaimable; reclaimable=$(reclaimable_total_gb)
+  printf '%sDjaunt MemGuard: %s\033[0m  — %s\n' "$(tier_color "$TIER_NAME")" "$TIER_NAME" "$REASON"
+  # Hysteresis means the raw reading can lead the settled tier by a sample or two.
+  [ "$RAW_TIER" != "$TIER" ] && printf '  (reading %s — holding until it repeats)\n' "$RAW_TIER_NAME"
+  echo
+  printf '  %-22s %s%%\n'        "memory free"       "$FREE_PCT"
+  printf '  %-22s %s (1 normal, 2 warn, 4 critical)\n' "kernel pressure" "$PRESSURE_LEVEL"
+  printf '  %-22s %s GB used, %s GB free\n' "swap" "$SWAP_USED_GB" "$SWAP_FREE_GB"
+  printf '  %-22s %s GB/min\n'   "swap growth"       "$SWAP_GROWTH_GB_PER_MIN"
+  printf '  %-22s %s GB\n'       "compressor"        "$COMPRESSOR_GB"
+  printf '  %-22s %s GB\n'       "wired"             "$WIRED_GB"
+  printf '  %-22s %s GB\n'       "boot disk free"    "$DISK_FREE_GB"
+  printf '  %-22s %s GB from idle renderers\n' "reclaimable" "$reclaimable"
+  is_paused && printf '\n  \033[33mpaused until %s\033[0m\n' "$(date -r "$(cat "$PAUSE_FILE")" '+%H:%M')"
+  echo
+}
+
+cmd_top() {
+  printf '\033[1mReclaimable (idle GUI renderers, safe to drop)\033[0m\n'
+  reclaim_candidates | awk -F'|' \
+    '{ label = $6; sub(/.*\//, "", label);
+       printf "  %-6s %7.0f MB  pid %-7s %s\n", $5, $2/1024, $3, label }'
+  printf '\n\033[1mProtected sample (agents, shells, and their subtrees)\033[0m\n'
+  classify_processes | awk -F'|' '$1 == "PROTECTED" && $2 > 51200' \
+    | sort -t'|' -k2,2nr | head -12 | awk -F'|' \
+    '{ label = $6; sub(/.*\//, "", label);
+       printf "  %7.0f MB  pid %-7s %s\n", $2/1024, $3, label }'
+  printf '\n  total reclaimable: %s GB\n\n' "$(reclaimable_total_gb)"
+}
+
+cmd_reclaim() {
+  if [ "${1:-}" = "--safe" ]; then
+    local target="${2:-2}"
+    echo "reclaiming up to ${target} GB from SAFE candidates..."
+    echo "freed $(reclaim_safe_until "$target") GB"
+    return
+  fi
+  [ -n "${1:-}" ] || { echo "usage: memguard reclaim <pid> | --safe <gb>" >&2; exit 1; }
+  reclaim_pid "$1"
+}
+
+cmd_install_sudoers() {
+  local sudoers_file=/etc/sudoers.d/memguard
+  local content="$(id -un) ALL=(root) NOPASSWD: /usr/sbin/purge, /usr/sbin/sysctl -w kern.memorypressure_manual_trigger=*"
+  echo "This lets MemGuard run soft relief without a password prompt."
+  echo "It grants exactly two commands, nothing else:"
+  echo
+  echo "  $content"
+  echo
+  printf 'Write it to %s? [y/N] ' "$sudoers_file"
+  read -r reply
+  [ "$reply" = "y" ] || { echo "skipped"; return 1; }
+  echo "$content" | sudo tee "$sudoers_file" >/dev/null \
+    && sudo chmod 0440 "$sudoers_file" \
+    && sudo visudo -cf "$sudoers_file" \
+    && echo "installed"
+}
+
+cmd_build_menubar() {
+  local src="$MEMGUARD_HOME/menubar/DjauntMemGuardBar.swift"
+  local app="$MENUBAR_APP"
+  echo "compiling menu bar app with system swiftc (no dependencies)..."
+  rm -rf "$app"
+  mkdir -p "$app/Contents/MacOS"
+  cat > "$app/Contents/Info.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>CFBundleName</key><string>DjauntMemGuardBar</string>
+  <key>CFBundleIdentifier</key><string>com.djaunt.memguard.menubar</string>
+  <key>CFBundleExecutable</key><string>DjauntMemGuardBar</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>1.0</string>
+  <key>LSUIElement</key><true/>
+</dict></plist>
+PLIST
+  swiftc -O -swift-version 5 -o "$app/Contents/MacOS/DjauntMemGuardBar" "$src" \
+    && echo "built $app"
+}
+
+cmd_install() {
+  chmod +x "$MEMGUARD_HOME/bin/djt-memguard" "$MEMGUARD_HOME/bin/djt-memguardd"
+  cmd_build_menubar || { echo "menu bar build failed" >&2; return 1; }
+
+  cat > "$AGENT_DAEMON" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.djaunt.memguard</string>
+  <key>ProgramArguments</key><array><string>$MEMGUARD_HOME/bin/djt-memguardd</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ProcessType</key><string>Background</string>
+  <key>StandardErrorPath</key><string>$MEMGUARD_STATE_DIR/daemon.err</string>
+  <key>StandardOutPath</key><string>$MEMGUARD_STATE_DIR/daemon.out</string>
+</dict></plist>
+PLIST
+
+  cat > "$AGENT_MENUBAR" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.djaunt.memguard.menubar</string>
+  <key>ProgramArguments</key><array><string>$MENUBAR_APP/Contents/MacOS/DjauntMemGuardBar</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardErrorPath</key><string>$MEMGUARD_STATE_DIR/menubar.err</string>
+</dict></plist>
+PLIST
+
+  launchctl unload "$AGENT_DAEMON" 2>/dev/null
+  launchctl unload "$AGENT_MENUBAR" 2>/dev/null
+  launchctl load -w "$AGENT_DAEMON" && echo "loaded daemon"
+  launchctl load -w "$AGENT_MENUBAR" && echo "loaded menu bar"
+  echo
+  echo "Run 'djt-memguard install-sudoers' to enable automatic purge relief."
+}
+
+cmd_uninstall() {
+  launchctl unload -w "$AGENT_DAEMON" 2>/dev/null
+  launchctl unload -w "$AGENT_MENUBAR" 2>/dev/null
+  rm -f "$AGENT_DAEMON" "$AGENT_MENUBAR"
+  pkill -f DjauntMemGuardBar 2>/dev/null
+  echo "unloaded and removed launch agents (sudoers entry left in place)"
+}
+
+cmd_pause() {
+  local minutes="${1:-60}"
+  echo $(( $(date +%s) + minutes * 60 )) > "$PAUSE_FILE"
+  echo "paused for ${minutes} minutes"
+}
+
+case "${1:-status}" in
+  status)          cmd_status ;;
+  json)            eval "$(memguard_probe)"; resolve_tier; write_state_json; cat "$STATE_JSON" ;;
+  top)             cmd_top ;;
+  relief)          soft_relief; echo "soft relief done — see 'memguard log'" ;;
+  reclaim)         shift; cmd_reclaim "$@" ;;
+  pause)           shift; cmd_pause "$@" ;;
+  resume)          rm -f "$PAUSE_FILE"; echo "resumed" ;;
+  log)             tail -n "${2:-40}" "$MEMGUARD_STATE_DIR/memguard.log" ;;
+  install)         cmd_install ;;
+  uninstall)       cmd_uninstall ;;
+  install-sudoers) cmd_install_sudoers ;;
+  build-menubar)   cmd_build_menubar ;;
+  help|-h|--help)
+    cat <<'HELP'
+djt-memguard <command>
+
+  status             current tier and all metrics (default)
+  top                what is reclaimable, and what is protected
+  relief             run soft relief now (purge; no process is killed)
+  reclaim <pid>      terminate one idle renderer, re-checked against protection
+  reclaim --safe <gb>  reclaim SAFE candidates until roughly <gb> is freed
+  pause [minutes]    silence relief and alerts (default 60)
+  resume             cancel a pause
+  log [lines]        recent activity
+  json               publish and print the state file
+  install            build the menu bar app and load both launch agents
+  uninstall          unload and remove the launch agents
+  install-sudoers    allow passwordless purge (two commands only)
+HELP
+    ;;
+  *) echo "unknown command: $1 (try 'memguard help')" >&2; exit 1 ;;
+esac
