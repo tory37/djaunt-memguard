@@ -2,8 +2,8 @@
 # Samples macOS memory state. Emits flat KEY=VALUE lines on stdout.
 #
 # The headline number in Activity Monitor is virtual size and is not a useful
-# signal. What actually precedes the out-of-memory dialog is swap headroom
-# collapsing while the compressor grows, so those are what we sample.
+# signal. What actually precedes the out-of-memory dialog is swap and the
+# compressor together outgrowing physical RAM, so LOAD_PCT measures that.
 
 MEMGUARD_STATE_DIR="${MEMGUARD_STATE_DIR:-$HOME/.djaunt/memguard}"
 SAMPLE_FILE="$MEMGUARD_STATE_DIR/samples"
@@ -71,6 +71,11 @@ memguard_probe() {
   wired_gb=$(vm_stat | awk -v ps="$pagesize" \
     '/Pages wired down/ { gsub(/\./, "", $NF); printf "%.2f", $NF * ps / 1073741824 }')
 
+  local mem_total_gb load_pct
+  mem_total_gb=$(sysctl -n hw.memsize | awk '{printf "%.2f", $1 / 1073741824}')
+  load_pct=$(awk -v s="$swap_used_gb" -v c="$compressor_gb" -v m="$mem_total_gb" \
+    'BEGIN {printf "%d", (s + c) * 100 / m}')
+
   local growth
   growth=$(swap_growth_per_min "$epoch" "$swap_used_gb")
   record_sample "$epoch" "$swap_used_gb"
@@ -84,6 +89,8 @@ memguard_probe() {
 EPOCH=$epoch
 PRESSURE_LEVEL=$pressure_level
 FREE_PCT=$free_pct
+MEM_TOTAL_GB=$mem_total_gb
+LOAD_PCT=$load_pct
 SWAP_TOTAL_GB=$swap_total_gb
 SWAP_USED_GB=$swap_used_gb
 SWAP_FREE_GB=$swap_free_gb

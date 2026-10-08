@@ -21,11 +21,14 @@ while true; do
       # threshold broke rather than whenever the alert is eventually read.
       [ "$TIER" -ge 1 ] && record_incident "$TIER_NAME" "$REASON"
       notify_tier_change "$TIER_NAME" "$REASON" "$(reclaimable_total_gb)"
+    elif [ "$TIER" -ge 1 ] && realert_is_due; then
+      memguard_log "still $TIER_NAME ($REASON), alerting again"
+      alert_for_tier "$TIER_NAME" "$REASON" "$(reclaimable_total_gb)"
     fi
 
     # Soft relief is state-preserving, so it can run unattended. Anything that
     # terminates a process stays behind an explicit click in the menu bar.
-    if [ "$TIER" -ge 1 ] && ! relief_is_cooling_down; then
+    if [ "$TIER" -ge 1 ] && soft_relief_is_enabled && ! relief_is_cooling_down; then
       soft_relief
     fi
   fi

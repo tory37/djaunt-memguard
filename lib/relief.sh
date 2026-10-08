@@ -27,7 +27,7 @@ relief_is_cooling_down() {
 
 # Drops the file cache. Frees inactive pages, loses no application state.
 run_purge() {
-  [ "${ENABLE_PURGE:-1}" = "1" ] || return 0
+  [ "${ENABLE_PURGE:-0}" = "1" ] || return 0
   if ! can_sudo_silently /usr/sbin/purge; then
     memguard_log "purge skipped: passwordless sudo not configured (run 'djt-memguard install-sudoers')"
     return 1
@@ -36,8 +36,8 @@ run_purge() {
   before=$(vm_stat | awk '/Pages free/ {gsub(/\./,"",$3); print $3}')
   sudo -n /usr/sbin/purge 2>/dev/null
   after=$(vm_stat | awk '/Pages free/ {gsub(/\./,"",$3); print $3}')
-  memguard_log "purge freed $(awk -v a="$before" -v b="$after" \
-    'BEGIN {printf "%.2f", (b - a) * 16384 / 1073741824}') GB"
+  memguard_log "purge dropped $(awk -v a="$before" -v b="$after" \
+    'BEGIN {printf "%.2f", (b - a) * 16384 / 1073741824}') GB of file cache (app memory untouched)"
 }
 
 # Signals critical pressure so apps voluntarily release their internal caches.
@@ -56,6 +56,10 @@ run_pressure_pulse() {
   reset_pressure
   trap - EXIT INT TERM
   memguard_log "pressure pulse completed and reset to normal"
+}
+
+soft_relief_is_enabled() {
+  [ "${ENABLE_PURGE:-0}" = "1" ] || [ "${ENABLE_PRESSURE_PULSE:-0}" = "1" ]
 }
 
 soft_relief() {

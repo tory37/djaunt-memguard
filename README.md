@@ -24,7 +24,8 @@ What actually moves ahead of an out-of-memory event, and what Djaunt MemGuard wa
 
 | Signal | Source |
 | --- | --- |
-| Free memory percentage | `kern.memorystatus_level` |
+| **Memory load** — swap used + compressor, as % of RAM | `vm.swapusage`, `vm_stat`, `hw.memsize` |
+| Free memory percentage (backstop only) | `kern.memorystatus_level` |
 | Kernel pressure level | `kern.memorystatus_vm_pressure_level` |
 | Swap growth rate | `vm.swapusage` sampled over ~60s |
 | Compressor size | `vm_stat` |
@@ -79,20 +80,31 @@ Additional guarantees:
 
 | Tier | Enters when any holds |
 | --- | --- |
-| WARN | free ≤ 20%, or free ≤ 30% while the kernel reports pressure, or swap growing ≥ 1.5 GB/min |
-| CRITICAL | free ≤ 10%, kernel pressure critical, swap growing ≥ 3 GB/min, or boot disk ≤ 15 GB |
+| WARN | load ≥ 120%, free ≤ 10%, or swap growing ≥ 1.5 GB/min |
+| CRITICAL | load ≥ 130%, free ≤ 5%, kernel pressure critical, or boot disk ≤ 15 GB |
 
-Escalates after 2 consecutive samples, de-escalates after 6. A late warning is
-useless; an early all-clear is misleading.
+Escalates after 2 consecutive samples (~20s), de-escalates after 30 (~5 min).
+A late warning is useless; an early all-clear is misleading.
+
+Why load and not free %: across 41 recorded incidents `kern.memorystatus_level`
+read 33–62% "free", including three minutes before an out-of-memory dialog. It
+counts compressible pages as free. Load read 131–137% in the 30 minutes before
+that dialog, and ~104% after recovery.
+
+Alerts: WARN posts a banner. CRITICAL posts a banner and opens a dialog that
+stays until dismissed. Both repeat every 10 minutes while the tier holds.
 
 ## Relief ladder
 
-1. **`purge`** — automatic. Drops the file cache. No data loss. Needs the
-   sudoers entry below.
+1. **`purge`** — off by default (`ENABLE_PURGE=0`). Drops only the file cache.
+   Pressure on this machine is anonymous app memory (compressed and swapped),
+   which purge cannot free, and the cache refills in minutes. Kept as a manual
+   menu item.
 2. **Pressure pulse** — opt-in, `ENABLE_PRESSURE_PULSE=0` by default. Signals
    critical pressure for ~3s so apps release internal caches, then resets.
    Writes a kernel sysctl, so it ships disabled until tested by hand.
-3. **Reclaim candidates** — manual click only, from the menu bar.
+3. **Reclaim idle tabs** — manual click only. This is the action that
+   actually frees memory. "Reclaim ~4 GB of idle tabs now" is the top item.
 
 ## Install
 
@@ -119,11 +131,11 @@ SwiftBar, no dependencies.
 ## Commands
 
 ```
-djt-djt-memguard status             current tier and all metrics
+djt-memguard status             current tier and all metrics
 djt-memguard top                what is reclaimable, and what is protected
-djt-memguard relief             run soft relief now
+djt-memguard relief             drop the file cache (does not free app memory)
 djt-memguard reclaim <pid>      terminate one idle renderer, re-checked first
-djt-memguard reclaim --safe 2   reclaim SAFE candidates until ~2 GB is freed
+djt-memguard reclaim --safe [gb] reclaim SAFE candidates until ~gb is freed (default 4)
 djt-memguard pause [minutes]    silence relief and alerts
 djt-memguard log [lines]        recent activity
 djt-memguard uninstall          unload and remove the launch agents
@@ -131,7 +143,7 @@ djt-memguard uninstall          unload and remove the launch agents
 
 ## Menu bar
 
-The item labels itself — `● MEM 51%` — so it is identifiable at a glance
+The item labels itself with memory load — `● MEM 104%` — so it is identifiable at a glance
 without clicking. Shape carries the tier alongside colour, so it still reads if
 colour does not: `●` green OK, `◆` orange WARN, `▲` red CRITICAL, `◐` paused.
 
@@ -152,15 +164,15 @@ After the next near-miss there is evidence instead of a guess.
 ## Layout
 
 ```
-bin/memguard        CLI
-bin/memguardd       daemon (poll, tier, notify, soft relief)
+bin/djt-memguard    CLI
+bin/djt-memguardd   daemon (poll, tier, notify, soft relief)
 lib/probe.sh        memory sampling
 lib/tier.sh         thresholds and hysteresis
 lib/protect.sh      protection and candidate classification
 lib/relief.sh       purge, pressure pulse, guarded reclaim
 lib/notify.sh       notifications
 menubar/            Swift NSStatusItem app
-config.env          thresholds; override at ~/.memguard/config.env
+config.env          thresholds; override at ~/.djaunt/memguard/config.env
 ```
 
-State, logs, and the published `state.json` live in `~/.memguard/`.
+State, logs, and the published `state.json` live in `~/.djaunt/memguard/`.

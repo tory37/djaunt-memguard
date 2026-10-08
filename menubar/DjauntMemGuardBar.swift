@@ -46,11 +46,11 @@ final class DjauntMemGuardBar: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         let tier = state["tier"] as? Int ?? 0
         let paused = state["paused"] as? Bool ?? false
-        let freePercent = state["free_pct"] as? Int ?? 0
+        let loadPercent = state["load_pct"] as? Int ?? 0
 
         // The item names itself rather than showing a bare dot, so it is
         // identifiable in a crowded menu bar without clicking it.
-        let label = paused ? "MEM paused" : "MEM \(freePercent)%"
+        let label = paused ? "MEM paused" : "MEM \(loadPercent)%"
         renderTitle(text: "\(glyph(forTier: tier, paused: paused)) \(label)",
                     color: color(forTier: tier, paused: paused))
     }
@@ -95,27 +95,22 @@ final class DjauntMemGuardBar: NSObject, NSApplicationDelegate, NSMenuDelegate {
         addInfo(menu, reason)
         menu.addItem(.separator())
 
-        addInfo(menu, String(format: "Memory free        %@%%", describe("free_pct")))
-        addInfo(menu, String(format: "Swap free          %@ GB", describe("swap_free_gb")))
+        addInfo(menu, String(format: "Memory load        %@%% of RAM", describe("load_pct")))
+        addInfo(menu, String(format: "Swap used          %@ GB", describe("swap_used_gb")))
         addInfo(menu, String(format: "Swap growth        %@ GB/min", describe("swap_growth_gb_per_min")))
         addInfo(menu, String(format: "Compressor         %@ GB", describe("compressor_gb")))
         menu.addItem(.separator())
 
         let reclaimable = state["reclaimable_gb"] as? Double ?? 0
-        addAction(menu, "Run soft relief now", #selector(runRelief))
 
         let candidates = state["candidates"] as? [[String: Any]] ?? []
         if !candidates.isEmpty {
+            addAction(menu, "Reclaim ~4 GB of idle tabs now", #selector(reclaimSafe))
+
             let reclaimItem = NSMenuItem(
-                title: String(format: "Reclaim idle tabs — %.1f GB available", reclaimable),
+                title: String(format: "Reclaim one tab — %.1f GB available", reclaimable),
                 action: nil, keyEquivalent: "")
             let submenu = NSMenu()
-
-            let bulk = NSMenuItem(title: "Reclaim ~2 GB of safe tabs",
-                                  action: #selector(reclaimSafe), keyEquivalent: "")
-            bulk.target = self
-            submenu.addItem(bulk)
-            submenu.addItem(.separator())
 
             for candidate in candidates {
                 guard let pid = candidate["pid"] as? Int,
@@ -136,6 +131,7 @@ final class DjauntMemGuardBar: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let paused = state["paused"] as? Bool ?? false
         addAction(menu, paused ? "Resume monitoring" : "Pause for 1 hour",
                   paused ? #selector(resume) : #selector(pause))
+        addAction(menu, "Drop file cache (does not free app memory)", #selector(runRelief))
         addAction(menu, "Open log", #selector(openLog))
         addAction(menu, "Quit DjauntMemGuardBar", #selector(quit))
     }
@@ -181,7 +177,7 @@ final class DjauntMemGuardBar: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func runRelief()   { runCLI(["relief"]) }
-    @objc private func reclaimSafe() { runCLI(["reclaim", "--safe", "2"]) }
+    @objc private func reclaimSafe() { runCLI(["reclaim", "--safe"]) }
     @objc private func pause()       { runCLI(["pause", "60"]) }
     @objc private func resume()      { runCLI(["resume"]) }
 

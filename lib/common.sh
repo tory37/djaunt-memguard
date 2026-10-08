@@ -52,6 +52,8 @@ write_state_json() {
     printf '  "tier_name": "%s",\n' "$TIER_NAME"
     printf '  "reason": "%s",\n' "$(json_escape "$REASON")"
     printf '  "free_pct": %s,\n' "$FREE_PCT"
+    printf '  "load_pct": %s,\n' "$LOAD_PCT"
+    printf '  "mem_total_gb": %s,\n' "$MEM_TOTAL_GB"
     printf '  "pressure_level": %s,\n' "$PRESSURE_LEVEL"
     printf '  "swap_used_gb": %s,\n' "$SWAP_USED_GB"
     printf '  "swap_free_gb": %s,\n' "$SWAP_FREE_GB"

@@ -19,7 +19,8 @@ cmd_status() {
   # Hysteresis means the raw reading can lead the settled tier by a sample or two.
   [ "$RAW_TIER" != "$TIER" ] && printf '  (reading %s — holding until it repeats)\n' "$RAW_TIER_NAME"
   echo
-  printf '  %-22s %s%%\n'        "memory free"       "$FREE_PCT"
+  printf '  %-22s %s%% of %s GB RAM (warn %s%%, critical %s%%)\n' "memory load" "$LOAD_PCT" "$MEM_TOTAL_GB" "$WARN_LOAD_PCT" "$CRIT_LOAD_PCT"
+  printf '  %-22s %s%% (kernel estimate; counts compressible pages as free)\n' "memory free" "$FREE_PCT"
   printf '  %-22s %s (1 normal, 2 warn, 4 critical)\n' "kernel pressure" "$PRESSURE_LEVEL"
   printf '  %-22s %s GB used, %s GB free\n' "swap" "$SWAP_USED_GB" "$SWAP_FREE_GB"
   printf '  %-22s %s GB/min\n'   "swap growth"       "$SWAP_GROWTH_GB_PER_MIN"
@@ -46,7 +47,7 @@ cmd_top() {
 
 cmd_reclaim() {
   if [ "${1:-}" = "--safe" ]; then
-    local target="${2:-2}"
+    local target="${2:-${RECLAIM_TARGET_GB:-4}}"
     echo "reclaiming up to ${target} GB from SAFE candidates..."
     echo "freed $(reclaim_safe_until "$target") GB"
     return
@@ -128,8 +129,6 @@ PLIST
   launchctl unload "$AGENT_MENUBAR" 2>/dev/null
   launchctl load -w "$AGENT_DAEMON" && echo "loaded daemon"
   launchctl load -w "$AGENT_MENUBAR" && echo "loaded menu bar"
-  echo
-  echo "Run 'djt-memguard install-sudoers' to enable automatic purge relief."
 }
 
 cmd_uninstall() {
@@ -150,7 +149,7 @@ case "${1:-status}" in
   status)          cmd_status ;;
   json)            eval "$(memguard_probe)"; resolve_tier; write_state_json; cat "$STATE_JSON" ;;
   top)             cmd_top ;;
-  relief)          soft_relief; echo "soft relief done — see 'memguard log'" ;;
+  relief)          ENABLE_PURGE=1; soft_relief; echo "file cache dropped — this does not free app memory; use 'reclaim --safe'" ;;
   reclaim)         shift; cmd_reclaim "$@" ;;
   pause)           shift; cmd_pause "$@" ;;
   resume)          rm -f "$PAUSE_FILE"; echo "resumed" ;;
@@ -165,9 +164,9 @@ djt-memguard <command>
 
   status             current tier and all metrics (default)
   top                what is reclaimable, and what is protected
-  relief             run soft relief now (purge; no process is killed)
+  relief             drop the file cache (purge); does not free app memory
   reclaim <pid>      terminate one idle renderer, re-checked against protection
-  reclaim --safe <gb>  reclaim SAFE candidates until roughly <gb> is freed
+  reclaim --safe [gb]  reclaim SAFE candidates until roughly [gb] is freed (default 4)
   pause [minutes]    silence relief and alerts (default 60)
   resume             cancel a pause
   log [lines]        recent activity

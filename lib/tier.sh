@@ -20,29 +20,28 @@ evaluate_raw_tier() {
   if [ "$PRESSURE_LEVEL" -ge 4 ] 2>/dev/null; then
     echo "2|kernel reports critical memory pressure"; return
   fi
+  if [ "$LOAD_PCT" -ge "$CRIT_LOAD_PCT" ]; then
+    echo "2|memory load ${LOAD_PCT}% of RAM (swap ${SWAP_USED_GB%.*} GB + compressor ${COMPRESSOR_GB%.*} GB)"; return
+  fi
   if at_or_below "$FREE_PCT" "$CRIT_FREE_PCT"; then
     echo "2|only ${FREE_PCT}% memory free"; return
-  fi
-  if at_or_above "$SWAP_GROWTH_GB_PER_MIN" "$CRIT_SWAP_GROWTH_GB_PER_MIN"; then
-    echo "2|swap growing fast at ${SWAP_GROWTH_GB_PER_MIN} GB/min"; return
   fi
   # Swap grows into free disk. When the disk is gone, so is the last runway.
   if at_or_below "$DISK_FREE_GB" "$CRIT_DISK_FREE_GB"; then
     echo "2|only ${DISK_FREE_GB} GB disk left for swap to grow into"; return
   fi
 
+  if [ "$LOAD_PCT" -ge "$WARN_LOAD_PCT" ]; then
+    echo "1|memory load ${LOAD_PCT}% of RAM (swap ${SWAP_USED_GB%.*} GB + compressor ${COMPRESSOR_GB%.*} GB)"; return
+  fi
   if at_or_below "$FREE_PCT" "$WARN_FREE_PCT"; then
     echo "1|${FREE_PCT}% memory free"; return
-  fi
-  if [ "$PRESSURE_LEVEL" -ge 2 ] 2>/dev/null \
-     && at_or_below "$FREE_PCT" "$WARN_FREE_PCT_UNDER_PRESSURE"; then
-    echo "1|${FREE_PCT}% free and the kernel is reporting pressure"; return
   fi
   if at_or_above "$SWAP_GROWTH_GB_PER_MIN" "$WARN_SWAP_GROWTH_GB_PER_MIN"; then
     echo "1|swap growing ${SWAP_GROWTH_GB_PER_MIN} GB/min"; return
   fi
 
-  echo "0|healthy"
+  echo "0|healthy (load ${LOAD_PCT}%)"
 }
 
 # Applies hysteresis and persists the result.
