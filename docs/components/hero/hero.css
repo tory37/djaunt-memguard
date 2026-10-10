@@ -1,0 +1,66 @@
+/* Djaunt hero — a page-top masthead: kicker, display heading, lede, and an
+   actions row, with an optional faint watermark mark behind it all. Blended
+   from four independent implementations that had all converged on the same
+   shape: djaunt-bean-guide's header.hero, djaunt-dot-agents' header.hero,
+   djaunt-browser-tools' .hero, and cartoonist-drawing-curriculum's
+   header.masthead — each with its own kicker/eyebrow label, a clamp-sized
+   h1, a muted lede paragraph, and a wrapping actions row. Pair
+   .dj-hero-actions with components/buttons for the buttons themselves.
+   Consumes role variables from tokens.css only. */
+
+.dj-hero {
+  position: relative;
+  padding: var(--dj-space-8) 0 var(--dj-space-6);
+  border-bottom: var(--dj-border-width) solid var(--dj-border);
+  overflow: hidden;
+}
+
+.dj-hero-mark {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 40%;
+  max-width: 420px;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.dj-hero-kicker {
+  position: relative;
+  display: inline-block;
+  font-family: var(--dj-font-mono);
+  font-size: var(--dj-text-xs);
+  letter-spacing: var(--dj-tracking-label);
+  text-transform: uppercase;
+  color: var(--dj-accent);
+  margin: 0 0 var(--dj-space-4);
+}
+
+.dj-hero-title {
+  position: relative;
+  font-family: var(--dj-font-display);
+  letter-spacing: var(--dj-tracking-display);
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  line-height: var(--dj-leading-tight);
+  color: var(--dj-text);
+  margin: 0 0 var(--dj-space-4);
+}
+
+.dj-hero-lede {
+  position: relative;
+  font-size: var(--dj-text-lg);
+  line-height: var(--dj-leading-body);
+  color: var(--dj-text-muted);
+  max-width: 60ch;
+  margin: 0;
+}
+
+.dj-hero-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dj-space-3);
+  margin-top: var(--dj-space-6);
+}

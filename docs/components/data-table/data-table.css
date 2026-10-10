@@ -1,0 +1,52 @@
+/* Djaunt data table — a scrollable wrapper around a plain table with a
+   mono, uppercase, muted header row, hairline row dividers, and a hover
+   highlight. Blended from djaunt-bean-guide's .table-scroll/table (bean
+   varieties, roast levels) and djaunt-dot-agents' table.agents (agent
+   roster) — both the same shape with different column semantics, which
+   this component leaves entirely to the consumer's own <td> content.
+   Consumes role variables from tokens.css only. */
+
+.dj-table-scroll {
+  overflow-x: auto;
+}
+
+.dj-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--dj-text-sm);
+}
+
+.dj-table th,
+.dj-table td {
+  padding: var(--dj-space-3) var(--dj-space-4);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.dj-table thead th {
+  font-family: var(--dj-font-mono);
+  font-size: var(--dj-text-xs);
+  letter-spacing: var(--dj-tracking-label);
+  text-transform: uppercase;
+  color: var(--dj-text-muted);
+  background: var(--dj-surface);
+  border-bottom: var(--dj-border-width) solid var(--dj-border);
+}
+
+.dj-table tbody td {
+  border-bottom: var(--dj-border-width) solid var(--dj-border);
+  color: var(--dj-text);
+}
+
+.dj-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dj-table tbody tr:hover td {
+  background: var(--dj-surface);
+}
+
+.dj-table td.wrap,
+.dj-table th.wrap {
+  white-space: normal;
+}

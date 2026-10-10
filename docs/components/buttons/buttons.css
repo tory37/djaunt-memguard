@@ -1,0 +1,108 @@
+/* Djaunt buttons — for a page's actions: hero/footer CTAs, and plain
+   in-app buttons (forms, per-item controls). Distinct from
+   components/popup's .dj-btn (a compact, full-width, mono uppercase
+   button built for a popup panel). Consumes role variables from
+   tokens.css only.
+
+   .dj-button alone is the neutral default: a bordered, surfaced button
+   for an in-app action (ported from djaunt-bean-guide's pot-cooking UI).
+   Add .dj-button-primary for a filled accent CTA, or .dj-button-ghost for
+   a transparent one that only picks up chrome on hover (both ported from
+   djaunt-dot-agents, and match "Primary action"/"Secondary" on this
+   repo's own showcase page). .dj-button-small shrinks it for a dense
+   row of controls. .dj-button-text-danger is a separate, text-only
+   destructive action (a "remove" or "clear" link), not a .dj-button
+   modifier. */
+
+.dj-button {
+  font-family: var(--dj-font-body);
+  font-size: var(--dj-text-sm);
+  font-weight: 500;
+  padding: 11px 20px;
+  border-radius: var(--dj-radius-md);
+  cursor: pointer;
+  border: var(--dj-border-width) solid var(--dj-border);
+  background: var(--dj-surface);
+  color: var(--dj-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: background var(--dj-dur-base) var(--dj-ease),
+              border-color var(--dj-dur-base) var(--dj-ease),
+              color var(--dj-dur-base) var(--dj-ease);
+}
+
+.dj-button:hover {
+  border-color: var(--dj-accent);
+  color: var(--dj-accent);
+}
+
+.dj-button-primary {
+  background: var(--dj-accent);
+  color: var(--dj-on-accent);
+  border-color: var(--dj-accent);
+  box-shadow: var(--dj-glow);
+}
+
+.dj-button-primary:hover {
+  background: var(--dj-accent-hi);
+  border-color: var(--dj-accent-hi);
+  color: var(--dj-on-accent);
+}
+
+.dj-button-ghost {
+  background: transparent;
+  color: var(--dj-text);
+}
+
+.dj-button-ghost:hover {
+  background: var(--dj-surface-raised);
+  border-color: var(--dj-bone-500);
+  color: var(--dj-text);
+}
+
+.dj-button-small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.dj-button:active {
+  transform: translateY(1px);
+}
+
+.dj-button:focus-visible {
+  outline: none;
+  box-shadow: var(--dj-glow);
+}
+
+.dj-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dj-button-text-danger {
+  font-family: var(--dj-font-body);
+  font-size: 13.5px;
+  background: none;
+  border: none;
+  color: var(--dj-danger);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  padding: 6px 4px;
+  transition: color var(--dj-dur-base) var(--dj-ease);
+}
+
+.dj-button-text-danger:hover {
+  color: color-mix(in srgb, var(--dj-danger) 80%, white);
+}
+
+.dj-button-text-danger:active {
+  transform: translateY(1px);
+}
+
+.dj-button-text-danger:focus-visible {
+  outline: none;
+  box-shadow: var(--dj-glow);
+}

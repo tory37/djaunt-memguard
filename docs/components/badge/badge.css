@@ -1,0 +1,48 @@
+/* Djaunt badge — a small uppercase tag: a category, a stage, a status.
+   Blended from djaunt-dot-agents' .badge (severity/category labels),
+   cartoonist-drawing-curriculum's .tag-chip/.stage-badge/.covered-badge,
+   and djaunt-bean-guide's .flag/.method-badge, all of which had built
+   some version of the same shape independently. Color comes from the
+   --dj-badge-color custom property, which the base and the semantic
+   modifier classes set to a token; a repo with its own category colors
+   (djaunt-dot-agents' feature/bug/research/…) can still use the base
+   shape and set --dj-badge-color to whatever it needs, inline or in a
+   local class. Consumes role variables from tokens.css only. */
+
+.dj-badge {
+  --dj-badge-color: var(--dj-text-muted);
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--dj-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: var(--dj-radius-sm);
+  border: var(--dj-border-width) solid color-mix(in srgb, var(--dj-badge-color) 40%, transparent);
+  background: color-mix(in srgb, var(--dj-badge-color) 14%, transparent);
+  color: var(--dj-badge-color);
+}
+
+/* A rounder, pill-shaped variant for a status/state label rather than a tag. */
+.dj-badge-pill {
+  border-radius: 999px;
+}
+
+.dj-badge-accent {
+  --dj-badge-color: var(--dj-accent);
+}
+
+.dj-badge-success {
+  --dj-badge-color: var(--dj-success);
+}
+
+.dj-badge-warning {
+  --dj-badge-color: var(--dj-warning);
+}
+
+.dj-badge-danger {
+  --dj-badge-color: var(--dj-danger);
+}

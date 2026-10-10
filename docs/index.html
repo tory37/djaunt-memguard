@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-dj-theme="hoard">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Djaunt MemGuard</title>
+  <meta name="description" content="Early warning and safe relief for macOS memory exhaustion. Warns before the out-of-memory dialog, never kills anything on its own.">
+  <meta name="theme-color" content="#0D0C0A">
+  <link rel="icon" href="brand/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="brand/favicon/apple-touch-icon.png">
+  <link rel="stylesheet" href="brand/fonts.css">
+  <link rel="stylesheet" href="brand/tokens/tokens.css">
+  <link rel="stylesheet" href="components/hero/hero.css">
+  <link rel="stylesheet" href="components/buttons/buttons.css">
+  <link rel="stylesheet" href="components/data-table/data-table.css">
+  <link rel="stylesheet" href="components/steps/steps.css">
+  <link rel="stylesheet" href="components/badge/badge.css">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <svg width="0" height="0" class="sprite" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  </svg>
+
+  <div class="topbar">
+    <div class="wrap">
+      <a class="brandmark" href="#top">
+        <img src="brand/logo/djaunt-icon-gold.svg" alt="">
+        <span>MemGuard</span>
+      </a>
+      <nav class="topnav" aria-label="Sections">
+        <a href="#numbers">The numbers</a>
+        <a href="#safety">Safety</a>
+        <a href="#relief">Relief</a>
+        <a href="#install">Install</a>
+        <a href="#platforms">Platforms</a>
+      </nav>
+    </div>
+  </div>
+
+  <main id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <header class="dj-hero">
+          <img class="dj-hero-mark" src="brand/logo/djaunt-icon-gold.svg" alt="" aria-hidden="true">
+          <p class="dj-hero-kicker">Djaunt / MemGuard / macOS</p>
+          <h1 class="dj-hero-title">Know before your Mac runs out of memory.</h1>
+          <p class="dj-hero-lede">MemGuard watches the signals that actually move before macOS shows "your system has run out of application memory." It warns early, shows what is reclaimable, and never kills anything on its own.</p>
+          <div class="dj-hero-actions">
+            <a class="dj-button dj-button-primary" href="#install">
+              <svg class="icon" aria-hidden="true"><use href="#i-terminal"/></svg>Install
+            </a>
+            <a class="dj-button dj-button-ghost" href="https://github.com/tory37/djaunt-memguard">
+              <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Source
+            </a>
+          </div>
+        </header>
+
+        <figure class="menubar-mock" aria-label="Example of the MemGuard menu bar item open during a warning">
+          <div class="menubar-strip" aria-hidden="true">
+            <span>Wi-Fi</span>
+            <span class="status-item"><span class="shape">&#9670;</span> MEM 124%</span>
+            <span>Thu 14:02</span>
+          </div>
+          <div class="menu-panel">
+            <div class="menu-row"><span class="value">Djaunt MemGuard — <span class="tier-warn">WARN</span></span></div>
+            <div class="menu-row"><span class="label">load 124% for 40s</span></div>
+            <div class="menu-sep"></div>
+            <div class="menu-row"><span class="label">Memory load</span><span class="value">124% of RAM</span></div>
+            <div class="menu-row"><span class="label">Swap used</span><span class="value">27.6 GB</span></div>
+            <div class="menu-row"><span class="label">Swap growth</span><span class="value">0.4 GB/min</span></div>
+            <div class="menu-row"><span class="label">Compressor</span><span class="value">16.1 GB</span></div>
+            <div class="menu-sep"></div>
+            <div class="menu-row action highlight"><span>Reclaim ~4 GB of idle tabs now</span></div>
+            <div class="menu-row action"><span>Reclaim one tab — 6.3 GB available</span><span class="label">&#8250;</span></div>
+            <div class="menu-sep"></div>
+            <div class="menu-row action"><span>Pause for 1 hour</span></div>
+            <div class="menu-row action"><span>Open log</span></div>
+          </div>
+          <figcaption class="menu-caption">Illustration. Values are examples.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <section class="section" id="numbers">
+      <div class="wrap">
+        <p class="eyebrow">Why the usual numbers lie</p>
+        <h2>Two alarming numbers that mean nothing.</h2>
+        <p class="lede">Activity Monitor and the out-of-memory dialog show figures that look like the problem and aren't. MemGuard ignores them and watches what actually moves first.</p>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-figure"><span class="big">1,837 GB</span><span class="vs">virtual vs footprint</span><span class="small">781 MB</span></div>
+            <p>One VS Code extension host, measured. The huge figure is address space that V8 reserves for its pointer-compression cage. It is a promise to the allocator, not memory, and it cannot fill up.</p>
+            <p>Chrome reserves 89 TB of virtual space on the same machine and nobody blames it.</p>
+          </div>
+          <div class="stat">
+            <div class="stat-figure"><span class="big">0.7 GB</span><span class="vs">swap free, healthy</span></div>
+            <p>macOS keeps the swap file near capacity and grows it on demand. Free swap sits near zero on a healthy Mac. Measured: 0.7 GB free while total swap grew from 27 to 28 GB.</p>
+          </div>
+          <div class="stat">
+            <div class="stat-figure"><span class="big">33–62%</span><span class="vs">"free" before a crash</span></div>
+            <p>Across 41 recorded incidents the kernel's free-memory level read 33–62%, including three minutes before an out-of-memory dialog. It counts compressible pages as free.</p>
+          </div>
+          <div class="stat">
+            <div class="stat-figure"><span class="big">131–137%</span><span class="vs">load before that dialog</span></div>
+            <p>Memory load (swap used plus compressor, as a share of RAM) climbed for 30 minutes before the same dialog. After recovery it read about 104%. This is the number MemGuard warns on.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="watches">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">What it watches</p>
+          <h2>Signals that move ahead of the dialog.</h2>
+          <p class="lede">Sampled every 10 seconds by a launch agent. Apps are ranked by physical footprint, the number Activity Monitor's Memory column and the out-of-memory dialog both use.</p>
+        </div>
+        <div>
+          <div class="dj-table-scroll">
+            <table class="dj-table">
+              <thead><tr><th>Signal</th><th class="wrap">Source</th></tr></thead>
+              <tbody>
+                <tr><td>Memory load</td><td class="wrap"><code>vm.swapusage</code>, <code>vm_stat</code>, <code>hw.memsize</code></td></tr>
+                <tr><td>Swap growth</td><td class="wrap"><code>vm.swapusage</code> over ~60s</td></tr>
+                <tr><td>Compressor size</td><td class="wrap"><code>vm_stat</code></td></tr>
+                <tr><td>Kernel pressure</td><td class="wrap"><code>kern.memorystatus_vm_pressure_level</code></td></tr>
+                <tr><td>Free % (backstop)</td><td class="wrap"><code>kern.memorystatus_level</code></td></tr>
+                <tr><td>Boot disk headroom</td><td class="wrap">swap cannot grow past it</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="dj-table-scroll">
+            <table class="dj-table">
+              <thead><tr><th>One extension host</th><th>Reading</th></tr></thead>
+              <tbody>
+                <tr><td><code>footprint -p</code></td><td>785 MB</td></tr>
+                <tr><td><code>top -stats mem</code></td><td>785 MB</td></tr>
+                <tr><td><code>ps rss</code></td><td>485 MB, 38% low</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tiers">
+      <div class="wrap">
+        <p class="eyebrow">Tiers</p>
+        <h2>Shape and color, so it reads either way.</h2>
+        <p class="lede">The menu bar item labels itself with memory load, so you can read it without clicking.</p>
+        <div class="tier-grid">
+          <div class="tier tier-ok">
+            <div class="tier-head"><span class="shape" aria-hidden="true">&#9679;</span>OK</div>
+            <p>Below every threshold.</p>
+          </div>
+          <div class="tier tier-warn">
+            <div class="tier-head"><span class="shape" aria-hidden="true">&#9670;</span>Warn</div>
+            <p>Load &ge; 120%, free &le; 10%, or swap growing &ge; 1.5 GB/min. Posts a banner.</p>
+          </div>
+          <div class="tier tier-critical">
+            <div class="tier-head"><span class="shape" aria-hidden="true">&#9650;</span>Critical</div>
+            <p>Load &ge; 130%, free &le; 5%, kernel pressure critical, or boot disk &le; 15 GB. Banner plus a dialog that stays until dismissed.</p>
+          </div>
+          <div class="tier tier-paused">
+            <div class="tier-head"><span class="shape" aria-hidden="true">&#9680;</span>Paused</div>
+            <p>Relief and alerts silenced for a set time.</p>
+          </div>
+        </div>
+        <p class="tier-note">Escalates after 2 samples (~20s). De-escalates after 30 (~5 min). A late warning is useless, and an early all-clear is misleading. Alerts repeat every 10 minutes while a tier holds.</p>
+      </div>
+    </section>
+
+    <section class="section" id="safety">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Safety</p>
+          <h2>Your agents and builds are never touched.</h2>
+          <p class="lede">Every agent, dev server, build, and SSH session runs inside a shell. MemGuard protects every shell subtree, so it excludes them by structure, not by a name list that goes stale.</p>
+        </div>
+        <div>
+          <div class="chain" aria-label="Process ancestry of a running agent">
+            <span class="node protected">claude</span><span class="arrow">&larr;</span>
+            <span class="node protected">/bin/zsh</span><span class="arrow">&larr;</span>
+            <span class="node">Code Helper (pty host)</span><span class="arrow">&larr;</span>
+            <span class="node">Code</span>
+            <span class="chain-legend">Green: inside a shell subtree, protected. Verified ancestry of a running agent.</span>
+          </div>
+          <ul class="rules">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-hand"/></svg><div><strong>Automatic relief never terminates anything.</strong> <span>Every kill is one explicit click.</span></div></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><div><strong>Re-checked at click time.</strong> <span>The target is validated against the protection rules again at the moment of the kill.</span></div></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-cpu"/></svg><div><strong>Only idle GUI renderers are candidates.</strong> <span>Browser and Electron renderer helpers, which reload when the window is next focused. Editor extension hosts are excluded because they hold state.</span></div></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><div><strong>Hard exclusions.</strong> <span>Busy processes, root-owned processes, and PIDs below 500 are never candidates. Editor renderers are flagged risky and sorted last.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="relief">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Relief ladder</p>
+          <h2>What it can do about it.</h2>
+          <p class="lede">The ladder ships conservative. Only the last rung frees real app memory, and it needs your click.</p>
+        </div>
+        <div class="dj-steps">
+          <div class="dj-step">
+            <h3>Purge <span class="dj-badge">off by default</span></h3>
+            <p>Drops the file cache only. Pressure is usually anonymous app memory, which purge cannot free, and the cache refills in minutes. Kept as a manual menu item.</p>
+          </div>
+          <div class="dj-step">
+            <h3>Pressure pulse <span class="dj-badge">opt-in</span></h3>
+            <p>Signals critical pressure for ~3s so apps release internal caches, then resets. It writes a kernel sysctl, so it ships disabled.</p>
+          </div>
+          <div class="dj-step">
+            <h3>Reclaim idle tabs <span class="dj-badge dj-badge-accent">manual</span></h3>
+            <p>The action that frees memory. One click reclaims idle renderers, or pick one from a ranked list with app and megabytes for each.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="recorder">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Black box recorder</p>
+          <h2>Evidence instead of a guess.</h2>
+        </div>
+        <div>
+          <p>The out-of-memory dialog names a culprit, but nothing is measuring when it appears, so the claim can never be checked. On every escalation MemGuard writes a timestamped snapshot to <code>~/.djaunt/memguard/incidents/</code>: per-app totals by physical footprint, the 25 largest processes with their protected or candidate status, and how much was reclaimable at that moment.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="install">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Install</p>
+          <h2>No Homebrew. No dependencies.</h2>
+          <p class="lede">Bash, launchd, and the system <code>swiftc</code> for the menu bar app. Everything lives in <code>~/.djaunt/memguard/</code>.</p>
+        </div>
+        <div class="dj-steps">
+          <div class="dj-step">
+            <h3>Clone</h3>
+            <pre>git clone https://github.com/tory37/djaunt-memguard.git
+cd djaunt-memguard/mac</pre>
+          </div>
+          <div class="dj-step">
+            <h3>Install the launch agents and menu bar app</h3>
+            <pre>./bin/djt-memguard install</pre>
+          </div>
+          <div class="dj-step">
+            <h3>Optional: passwordless purge</h3>
+            <p>Grants exactly two commands, nothing else.</p>
+            <pre>./bin/djt-memguard install-sudoers</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="commands">
+      <div class="wrap">
+        <p class="eyebrow">CLI</p>
+        <h2>Everything the menu does, in a shell.</h2>
+        <div class="terminal">
+          <div class="terminal-bar">djt-memguard</div>
+<pre><span class="prompt">$</span> <span class="cmd">djt-memguard status</span>            <span class="comment"># current tier and all metrics</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard top</span>               <span class="comment"># what is reclaimable, what is protected</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard reclaim &lt;pid&gt;</span>     <span class="comment"># terminate one idle renderer, re-checked first</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard reclaim --safe</span>    <span class="comment"># reclaim safe candidates up to a target</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard relief</span>            <span class="comment"># drop the file cache</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard pause 60</span>          <span class="comment"># silence relief and alerts</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard log</span>               <span class="comment"># recent activity</span>
+<span class="prompt">$</span> <span class="cmd">djt-memguard uninstall</span>         <span class="comment"># unload and remove the launch agents</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="platforms">
+      <div class="wrap">
+        <p class="eyebrow">Platforms</p>
+        <h2>macOS today. Laid out for more.</h2>
+        <p class="lede">Each platform lives in its own top-level folder with its own probe, tiers, and UI. The ideas carry over. The signals do not.</p>
+        <div class="platforms">
+          <div class="platform">
+            <div class="platform-head"><h3>macOS</h3><span class="dj-badge dj-badge-success">supported</span></div>
+            <p>In <code>mac/</code>. Launch agent, CLI, and native menu bar app. Tested on Apple silicon.</p>
+          </div>
+          <div class="platform pending">
+            <div class="platform-head"><h3>Linux</h3><span class="dj-badge">not started</span></div>
+            <p>Would watch PSI (<code>/proc/pressure/memory</code>) and the OOM killer.</p>
+          </div>
+          <div class="platform pending">
+            <div class="platform-head"><h3>Windows</h3><span class="dj-badge">not started</span></div>
+            <p>Would watch commit charge against the commit limit.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <img src="brand/logo/djaunt-wordmark-bone.svg" alt="Djaunt">
+      <span>MemGuard. <a href="https://github.com/tory37/djaunt-memguard">Source on GitHub</a>.</span>
+    </div>
+  </footer>
+</body>
+</html>

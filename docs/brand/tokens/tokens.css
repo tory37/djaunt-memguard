@@ -1,0 +1,345 @@
+/* Djaunt design tokens — v1
+   Source of truth. Do not hand-edit values in downstream projects; import this file.
+   Dark-first. Every theme below is a dark theme; there is one light mode (.dj-light).
+*/
+
+:root {
+  /* ---- Brand core ---- */
+  --dj-gold-300: #F6D77E;
+  --dj-gold-400: #F0C24B;
+  --dj-gold-500: #D4A017;
+  --dj-gold-600: #A87A12;
+  --dj-gold-700: #6E4A0E;
+  --dj-bone-100: #FBF8F1;
+  --dj-bone-200: #EDE6D6;
+  --dj-bone-300: #C8C0AE;
+  --dj-bone-400: #8E887A;
+  --dj-bone-500: #615C52;
+  --dj-ink-400: #3A342A;
+  --dj-ink-500: #2A251C;
+  --dj-ink-600: #1C1913;
+  --dj-ink-700: #14120F;
+  --dj-ink-800: #0D0C0A;
+  --dj-ink-900: #0A0908;
+
+  /* ---- Typography ---- */
+  --dj-font-display: 'Archivo', 'Helvetica Neue', Helvetica, sans-serif;
+  --dj-font-body: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, sans-serif;
+  --dj-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --dj-text-xs: 0.75rem;
+  --dj-text-sm: 0.875rem;
+  --dj-text-base: 1rem;
+  --dj-text-lg: 1.125rem;
+  --dj-text-xl: 1.375rem;
+  --dj-text-2xl: 1.75rem;
+  --dj-text-3xl: 2.25rem;
+  --dj-text-4xl: 3rem;
+  --dj-text-5xl: 4rem;
+
+  --dj-tracking-display: -0.02em;  /* display caps run tight */
+  --dj-tracking-label: 0.14em;     /* mono eyebrows run wide */
+  --dj-leading-tight: 1.08;
+  --dj-leading-body: 1.6;
+
+  /* ---- Space (4px base) ---- */
+  --dj-space-1: 4px;  --dj-space-2: 8px;  --dj-space-3: 12px;
+  --dj-space-4: 16px; --dj-space-5: 24px; --dj-space-6: 32px;
+  --dj-space-7: 48px; --dj-space-8: 64px; --dj-space-9: 96px;
+
+  /* ---- Radius — scales are shallow; Djaunt is angular, not pill-shaped ---- */
+  --dj-radius-sm: 2px;
+  --dj-radius-md: 4px;
+  --dj-radius-lg: 8px;
+  --dj-radius-full: 999px; /* avatars and status dots only */
+
+  /* ---- Borders & elevation ---- */
+  --dj-border-width: 1px;
+  --dj-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --dj-shadow-md: 0 4px 16px rgb(0 0 0 / 0.55);
+  --dj-shadow-lg: 0 16px 48px rgb(0 0 0 / 0.6);
+
+  /* ---- Motion ---- */
+  --dj-ease: cubic-bezier(0.2, 0, 0.2, 1);
+  --dj-dur-fast: 120ms;
+  --dj-dur-base: 200ms;
+  --dj-dur-slow: 400ms;
+
+  /* ---- Semantic (theme-independent) ---- */
+  --dj-success: #5FBF7A;
+  --dj-warning: #F0C24B;
+  --dj-danger: #E0492E;
+  --dj-info: #7FD8F0;
+
+  /* ---- Derived accent scale ----
+     --dj-accent-hi / --dj-accent / --dj-accent-deep (below, per theme) are
+     the 400/500/700 steps of a 5-step ramp; these two fill the 300 and 600
+     gaps from those same per-theme anchors, so anything needing a full ramp
+     has one for every theme without hand-picking two new hex values each. */
+  --dj-accent-300: color-mix(in srgb, var(--dj-accent-hi) 70%, white 30%);
+  --dj-accent-600: color-mix(in srgb, var(--dj-accent) 55%, var(--dj-accent-deep) 45%);
+}
+
+/* ============================================================
+   THEMES — apply on <html> or any container: data-dj-theme="fire"
+   Default (no attribute) is Hoard.
+   ============================================================ */
+
+:root, [data-dj-theme="hoard"] {
+  --dj-accent: #D4A017;
+  --dj-accent-hi: #F0C24B;
+  --dj-accent-deep: #6E4A0E;
+  /* Categorical accents -- for coding several simultaneous meaningful
+     states/categories on one surface (status lanes, a gauge's zones), never
+     a second mood. See BRANDING.md §2 "Categorical / multi-accent
+     surfaces". Muted relative to --dj-accent on purpose: they support, they
+     don't compete with the theme's own mood. */
+  --dj-accent-2: #3BB07C;
+  --dj-accent-3: #816ACD;
+  --dj-accent-4: #C65373;
+  --dj-bg: #0D0C0A;
+  --dj-surface: #14120F;
+  --dj-surface-raised: #1C1913;
+  --dj-border: #2A251C;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #0D0C0A;
+  --dj-glow: 0 0 24px #D4A01733;
+}
+[data-dj-theme="fire"] {
+  --dj-accent: #FF6B2C;
+  --dj-accent-hi: #FF9560;
+  --dj-accent-deep: #7A2408;
+  --dj-accent-2: #54D7A7;
+  --dj-accent-3: #5A74D8;
+  --dj-accent-4: #D754B0;
+  --dj-bg: #100A07;
+  --dj-surface: #1A100B;
+  --dj-surface-raised: #241610;
+  --dj-border: #352115;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #100A07;
+  --dj-glow: 0 0 24px #FF6B2C33;
+}
+[data-dj-theme="blood"] {
+  --dj-accent: #E8475C;
+  --dj-accent-hi: #F58090;
+  --dj-accent-deep: #6E1424;
+  --dj-accent-2: #5FCFB0;
+  --dj-accent-3: #E0B85F;
+  --dj-accent-4: #7A8FE0;
+  --dj-bg: #0F0709;
+  --dj-surface: #190C0F;
+  --dj-surface-raised: #231216;
+  --dj-border: #341B20;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #0F0709;
+  --dj-glow: 0 0 24px #E8475C33;
+}
+[data-dj-theme="earth"] {
+  --dj-accent: #B98358;
+  --dj-accent-hi: #D8A87F;
+  --dj-accent-deep: #5A3A22;
+  --dj-accent-2: #7FB58A;
+  --dj-accent-3: #8A8FC9;
+  --dj-accent-4: #C9737F;
+  --dj-bg: #0E0A07;
+  --dj-surface: #17110C;
+  --dj-surface-raised: #211812;
+  --dj-border: #33261B;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #0E0A07;
+  --dj-glow: 0 0 24px #B9835833;
+}
+[data-dj-theme="venom"] {
+  --dj-accent: #A8E01F;
+  --dj-accent-hi: #C9F05E;
+  --dj-accent-deep: #47660A;
+  --dj-accent-2: #557EC1;
+  --dj-accent-3: #AD5AC3;
+  --dj-accent-4: #ADBB44;
+  --dj-bg: #080F04;
+  --dj-surface: #0F170A;
+  --dj-surface-raised: #15200E;
+  --dj-border: #1F2E14;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #080F04;
+  --dj-glow: 0 0 24px #A8E01F33;
+}
+[data-dj-theme="frost"] {
+  --dj-accent: #6BA4FF;
+  --dj-accent-hi: #A6C8FF;
+  --dj-accent-deep: #173F80;
+  --dj-accent-2: #F0B46B;
+  --dj-accent-3: #B58CE8;
+  --dj-accent-4: #6BD6B5;
+  --dj-bg: #060B14;
+  --dj-surface: #0B1420;
+  --dj-surface-raised: #111E2E;
+  --dj-border: #1B2C44;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #060B14;
+  --dj-glow: 0 0 24px #6BA4FF33;
+}
+[data-dj-theme="storm"] {
+  --dj-accent: #9B8CFF;
+  --dj-accent-hi: #C3B8FF;
+  --dj-accent-deep: #3B2C86;
+  --dj-accent-2: #E0E9A2;
+  --dj-accent-3: #BCE9A2;
+  --dj-accent-4: #A2BCE9;
+  --dj-bg: #0A0912;
+  --dj-surface: #12101F;
+  --dj-surface-raised: #1A1729;
+  --dj-border: #262138;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #0A0912;
+  --dj-glow: 0 0 24px #9B8CFF33;
+}
+[data-dj-theme="bloom"] {
+  --dj-accent: #FF6FB0;
+  --dj-accent-hi: #FFA6CF;
+  --dj-accent-deep: #7A1C4C;
+  --dj-accent-2: #6FE0B8;
+  --dj-accent-3: #B3A2FF;
+  --dj-accent-4: #F0D27A;
+  --dj-bg: #10070C;
+  --dj-surface: #1A0D14;
+  --dj-surface-raised: #24141D;
+  --dj-border: #36202C;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #10070C;
+  --dj-glow: 0 0 24px #FF6FB033;
+}
+[data-dj-theme="stone"] {
+  --dj-accent: #8E9196;
+  --dj-accent-hi: #B8BBC0;
+  --dj-accent-deep: #36393D;
+  --dj-accent-2: #8FB0C9;
+  --dj-accent-3: #B08FC9;
+  --dj-accent-4: #C9B08F;
+  --dj-bg: #0C0D0E;
+  --dj-surface: #131415;
+  --dj-surface-raised: #1A1C1D;
+  --dj-border: #27292B;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #0C0D0E;
+  --dj-glow: 0 0 24px #8E919633;
+}
+[data-dj-theme="void"] {
+  --dj-accent: #CFCFCF;
+  --dj-accent-hi: #EDEDED;
+  --dj-accent-deep: #2E2E2E;
+  --dj-accent-2: #9BB8C9;
+  --dj-accent-3: #B39BC9;
+  --dj-accent-4: #C9B99B;
+  --dj-bg: #000000;
+  --dj-surface: #080808;
+  --dj-surface-raised: #101010;
+  --dj-border: #1E1E1E;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #000000;
+  --dj-glow: 0 0 24px #CFCFCF33;
+}
+[data-dj-theme="radiant"] {
+  --dj-accent: #F4F4F2;
+  --dj-accent-hi: #FFFFFF;
+  --dj-accent-deep: #6B6B68;
+  --dj-accent-2: #A8E6CF;
+  --dj-accent-3: #C3B4EE;
+  --dj-accent-4: #F0B4C8;
+  --dj-bg: #0F0F10;
+  --dj-surface: #171718;
+  --dj-surface-raised: #202021;
+  --dj-border: #2E2E30;
+  --dj-text: var(--dj-bone-200);
+  --dj-text-muted: var(--dj-bone-400);
+  --dj-on-accent: #0F0F10;
+  --dj-glow: 0 0 24px #F4F4F233;
+}
+
+/* ============================================================
+   LIGHT MODE — a single parchment variant. Dark is primary;
+   use light only when the host context demands it (print, email,
+   docs embedded in a light app).
+   ============================================================ */
+.dj-light, [data-dj-mode="light"] {
+  --dj-bg: #F7F3E9;
+  --dj-surface: #FFFDF7;
+  --dj-surface-raised: #FFFFFF;
+  --dj-border: #DED5C0;
+  --dj-text: #1A1712;
+  --dj-text-muted: #6B6355;
+  --dj-accent: var(--dj-gold-600);
+  --dj-accent-hi: var(--dj-gold-500);
+  --dj-accent-deep: var(--dj-gold-700);
+  --dj-on-accent: #FFFDF7;
+  --dj-glow: none;
+}
+
+/* ============================================================
+   TERMINAL / CLI — 16-color ANSI scheme
+   Every slot below is derived from existing per-theme role tokens (never a
+   fresh hand-picked hex), so a Djaunt terminal genuinely follows whichever
+   element is active. Semantic slots (red/green/blue) stay pinned to the
+   fixed danger/success/info tokens for tool-output consistency (git status,
+   diagnostics) across themes; yellow/magenta/cyan carry the theme's own
+   accent + categorical accents, continuing Hoard's own convention (its
+   accent already sits in the yellow slot) out to every element.
+   ============================================================ */
+:root {
+  --dj-term-bg: var(--dj-bg);
+  --dj-term-fg: var(--dj-text);
+  --dj-term-cursor: var(--dj-accent-hi);
+  --dj-term-selection: var(--dj-border);
+
+  --dj-ansi-black: var(--dj-surface);
+  --dj-ansi-red: color-mix(in srgb, var(--dj-danger) 80%, black);
+  --dj-ansi-green: color-mix(in srgb, var(--dj-success) 80%, black);
+  --dj-ansi-yellow: var(--dj-accent);
+  --dj-ansi-blue: color-mix(in srgb, var(--dj-info) 75%, black);
+  --dj-ansi-magenta: var(--dj-accent-3);
+  --dj-ansi-cyan: var(--dj-accent-2);
+  --dj-ansi-white: var(--dj-bone-300);
+
+  --dj-ansi-bright-black: var(--dj-border);
+  --dj-ansi-bright-red: var(--dj-danger);
+  --dj-ansi-bright-green: var(--dj-success);
+  --dj-ansi-bright-yellow: var(--dj-accent-hi);
+  --dj-ansi-bright-blue: var(--dj-info);
+  --dj-ansi-bright-magenta: var(--dj-accent-4);
+  --dj-ansi-bright-cyan: color-mix(in srgb, var(--dj-accent-2) 70%, white 30%);
+  --dj-ansi-bright-white: var(--dj-bone-100);
+}
+
+/* ============================================================
+   CODE SYNTAX — "Djaunt Hoard"
+   Same derivation approach as the ANSI scheme above: every slot maps to an
+   existing per-theme role token, so a Djaunt syntax theme follows whichever
+   element is active instead of staying gold-only.
+   ============================================================ */
+:root {
+  --dj-code-bg: var(--dj-bg);
+  --dj-code-fg: var(--dj-text);
+  --dj-code-comment: var(--dj-bone-500);
+  --dj-code-keyword: var(--dj-accent);
+  --dj-code-string: var(--dj-accent-2);
+  --dj-code-number: var(--dj-accent-hi);
+  --dj-code-function: var(--dj-accent-300);
+  --dj-code-type: var(--dj-accent-3);
+  --dj-code-variable: var(--dj-text);
+  --dj-code-operator: var(--dj-bone-300);
+  --dj-code-punctuation: var(--dj-text-muted);
+  --dj-code-invalid: var(--dj-danger);
+  --dj-code-line-highlight: var(--dj-surface);
+  --dj-code-selection: var(--dj-border);
+}
